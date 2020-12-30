@@ -74,10 +74,14 @@ namespace GodotQuickLaunch
                 }
                 trayContextMenuStrip.Items.Add(new ToolStripSeparator());
             }
-            // Add context menu strip items for launch godot, settings and exit
-            if(!string.IsNullOrWhiteSpace(godotPathTextBox.Text))
+            // Add context menu strip items for launch godot, open project folder, settings and exit
+            if(!string.IsNullOrWhiteSpace(godotPath))
             {
                 trayContextMenuStrip.Items.Add("Launch Godot");
+            }
+            if(!string.IsNullOrWhiteSpace(projectsDirectory))
+            {
+                trayContextMenuStrip.Items.Add("Open Projects Folder");
             }
             trayContextMenuStrip.Items.Add("Settings");
             trayContextMenuStrip.Items.Add("Exit");
@@ -98,6 +102,9 @@ namespace GodotQuickLaunch
                     break;
                 case "launch godot":
                     RunGodot();
+                    break;
+                case "open projects folder":
+                    OpenProjectsFolder();
                     break;
                 default:
                     // If a path to Godot exists start a process with it
@@ -124,6 +131,11 @@ namespace GodotQuickLaunch
         private void RunGodot()
         {
             Process.Start(godotPath);
+        }
+
+        private void OpenProjectsFolder()
+        {
+            Process.Start(projectsDirectory);
         }
 
 
