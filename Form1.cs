@@ -20,7 +20,11 @@ namespace GodotQuickLaunch
         public Form1()
         {
             InitializeComponent();
-
+            exitButton.Click += Exit;
+            saveButton.Click += Save;
+            closeButton.Click += CloseForm;
+            browseProjectsDirectoryButton.Click += BrowseProjectsDirectory;
+            browseGodotPathButton.Click += BrowseGodotPath;
             // Get saved data from registry
             RegistryKey savedData = Registry.CurrentUser.OpenSubKey(RegistryKeyAppName);
             if(savedData != null)
@@ -69,7 +73,7 @@ namespace GodotQuickLaunch
                     {
                         // Verify that the folder is a Godot project by checking if a project.godot file exists inside and add an entry to the context menu strip
                         if(File.Exists(dirs[i] + @"\project.godot"))
-                            trayContextMenuStrip.Items.Add(projectName);
+                            trayContextMenuStrip.Items.Add(projectName, null, OpenProject);
                     }
                 }
                 trayContextMenuStrip.Items.Add(new ToolStripSeparator());
@@ -77,69 +81,48 @@ namespace GodotQuickLaunch
             // Add context menu strip items for launch godot, open project folder, settings and exit
             if(!string.IsNullOrWhiteSpace(godotPath))
             {
-                trayContextMenuStrip.Items.Add("Launch Godot");
+                trayContextMenuStrip.Items.Add("Launch Godot", null, RunGodot);
             }
             if(!string.IsNullOrWhiteSpace(projectsDirectory))
             {
-                trayContextMenuStrip.Items.Add("Open Projects Folder");
+                trayContextMenuStrip.Items.Add("Open Projects Folder", null, OpenProjectsFolder);
             }
-            trayContextMenuStrip.Items.Add("Settings");
-            trayContextMenuStrip.Items.Add("Exit");
+            trayContextMenuStrip.Items.Add("Settings", null, OpenSettings);
+            trayContextMenuStrip.Items.Add("Exit", null, Exit);
         }
 
         // Add a slash at the end of the projects path if there isn't one
         private string FormatPath(string p) => p.EndsWith(@"\") ? p : p + @"\";
 
-        private void TrayContextMenuStrip_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+
+        private void OpenProject(object sender, EventArgs e)
         {
-            switch (e.ClickedItem.Text.ToLower())
+            // If a path to Godot exists start a process with it
+            if (!string.IsNullOrWhiteSpace(godotPath))
             {
-                case "exit":
-                    Application.Exit();
-                    break;
-                case "settings":
-                    OpenSettings();
-                    break;
-                case "launch godot":
-                    RunGodot();
-                    break;
-                case "open projects folder":
-                    OpenProjectsFolder();
-                    break;
-                default:
-                    // If a path to Godot exists start a process with it
-                    if(!string.IsNullOrWhiteSpace(godotPath))
-                    {
-                        // Wrap the project path in quotes in case there are spaces
-                        // Passing a path with spaces as an argument to Godot doesn't work and just launches the project picker instead
-                        string path = "\"" + projectsDirectory + e.ClickedItem.Text + @"\project.godot" + "\"";
-                        ProcessStartInfo startInfo = new ProcessStartInfo(godotPath)
-                        {
-                            Arguments = path
-                        };
-                        Process.Start(startInfo);
-                    }
-                    // Otherwise run project.godot with the default program associated with .godot files
-                    else
-                    {
-                        Process.Start(projectsDirectory + e.ClickedItem.Text + @"\project.godot");
-                    }
-                    break;
+                // Wrap the project path in quotes in case there are spaces
+                // Passing a path with spaces as an argument to Godot doesn't work and just launches the project picker instead
+                string path = "\"" + projectsDirectory + sender.ToString() + @"\project.godot" + "\"";
+                ProcessStartInfo startInfo = new ProcessStartInfo(godotPath)
+                {
+                    Arguments = path
+                };
+                Process.Start(startInfo);
+            }
+            // Otherwise run project.godot with the default program associated with .godot files
+            else
+            {
+                Process.Start(projectsDirectory + sender.ToString() + @"\project.godot");
             }
         }
 
-        private void RunGodot()
-        {
-            Process.Start(godotPath);
-        }
+        private void RunGodot(object sender, EventArgs e) => Process.Start(godotPath);
 
-        private void OpenProjectsFolder()
-        {
-            Process.Start(projectsDirectory);
-        }
+        private void OpenProjectsFolder(object sender, EventArgs e) => Process.Start(projectsDirectory);
 
+        private void Exit(object sender, EventArgs e) => Application.Exit();
 
-        private void OpenSettings()
+        private void OpenSettings(object sender, EventArgs e)
         {
             projectsDirectoryTextBox.Text = projectsDirectory;
             godotPathTextBox.Text = godotPath;
@@ -147,12 +130,11 @@ namespace GodotQuickLaunch
             Show();
             Activate();
         }
-        private void TrayContextMenuStrip_Opening(object sender, CancelEventArgs e)
-        {
-            SetupProjectsList();
-        }
 
-        private void SaveButton_Click(object sender, EventArgs e)
+
+        private void TrayContextMenuStrip_Opening(object sender, CancelEventArgs e) => SetupProjectsList();
+
+        private void Save(object sender, EventArgs e)
         {
             projectsDirectory = projectsDirectoryTextBox.Text;
             godotPath = godotPathTextBox.Text;
@@ -187,17 +169,9 @@ namespace GodotQuickLaunch
             runKey.Close();
         }
 
-        private void CloseButton_Click(object sender, EventArgs e)
-        {
-            Hide();
-        }
+        private void CloseForm(object sender, EventArgs e) => Hide();
 
-        private void ExitButton_Click(object sender, EventArgs e)
-        {
-            Application.Exit();
-        }
-
-        private void BrowseProjectsDirectoryButton_Click(object sender, EventArgs e)
+        private void BrowseProjectsDirectory(object sender, EventArgs e)
         {
             FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog
             {
@@ -210,7 +184,7 @@ namespace GodotQuickLaunch
             }
         }
 
-        private void GodotPathBrowseButton_Click(object sender, EventArgs e)
+        private void BrowseGodotPath(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog
             {

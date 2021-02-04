@@ -43,7 +43,7 @@ namespace GodotQuickLaunch
             this.browseProjectsDirectoryButton = new System.Windows.Forms.Button();
             this.godotPathLabel = new System.Windows.Forms.Label();
             this.godotPathTextBox = new System.Windows.Forms.TextBox();
-            this.godotPathBrowseButton = new System.Windows.Forms.Button();
+            this.browseGodotPathButton = new System.Windows.Forms.Button();
             this.trayContextMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -54,14 +54,13 @@ namespace GodotQuickLaunch
             this.trayContextMenuStrip.Name = "taskbarContextMenuStrip";
             this.trayContextMenuStrip.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
             this.trayContextMenuStrip.ShowImageMargin = false;
-            this.trayContextMenuStrip.Size = new System.Drawing.Size(156, 32);
+            this.trayContextMenuStrip.Size = new System.Drawing.Size(36, 10);
             this.trayContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.TrayContextMenuStrip_Opening);
-            this.trayContextMenuStrip.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.TrayContextMenuStrip_ItemClicked);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(152, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(32, 6);
             // 
             // notifyIcon1
             // 
@@ -94,7 +93,6 @@ namespace GodotQuickLaunch
             this.saveButton.TabIndex = 3;
             this.saveButton.Text = "Save";
             this.saveButton.UseVisualStyleBackColor = true;
-            this.saveButton.Click += new System.EventHandler(this.SaveButton_Click);
             // 
             // runOnStartupCheckBox
             // 
@@ -114,7 +112,6 @@ namespace GodotQuickLaunch
             this.closeButton.TabIndex = 6;
             this.closeButton.Text = "Close";
             this.closeButton.UseVisualStyleBackColor = true;
-            this.closeButton.Click += new System.EventHandler(this.CloseButton_Click);
             // 
             // exitButton
             // 
@@ -124,7 +121,6 @@ namespace GodotQuickLaunch
             this.exitButton.TabIndex = 7;
             this.exitButton.Text = "Exit";
             this.exitButton.UseVisualStyleBackColor = true;
-            this.exitButton.Click += new System.EventHandler(this.ExitButton_Click);
             // 
             // browseProjectsDirectoryButton
             // 
@@ -134,7 +130,6 @@ namespace GodotQuickLaunch
             this.browseProjectsDirectoryButton.TabIndex = 8;
             this.browseProjectsDirectoryButton.Text = "Browse...";
             this.browseProjectsDirectoryButton.UseVisualStyleBackColor = true;
-            this.browseProjectsDirectoryButton.Click += new System.EventHandler(this.BrowseProjectsDirectoryButton_Click);
             // 
             // godotPathLabel
             // 
@@ -152,22 +147,21 @@ namespace GodotQuickLaunch
             this.godotPathTextBox.Size = new System.Drawing.Size(326, 20);
             this.godotPathTextBox.TabIndex = 10;
             // 
-            // godotPathBrowseButton
+            // browseGodotPathButton
             // 
-            this.godotPathBrowseButton.Location = new System.Drawing.Point(347, 62);
-            this.godotPathBrowseButton.Name = "godotPathBrowseButton";
-            this.godotPathBrowseButton.Size = new System.Drawing.Size(75, 23);
-            this.godotPathBrowseButton.TabIndex = 11;
-            this.godotPathBrowseButton.Text = "Browse...";
-            this.godotPathBrowseButton.UseVisualStyleBackColor = true;
-            this.godotPathBrowseButton.Click += new System.EventHandler(this.GodotPathBrowseButton_Click);
+            this.browseGodotPathButton.Location = new System.Drawing.Point(347, 62);
+            this.browseGodotPathButton.Name = "browseGodotPathButton";
+            this.browseGodotPathButton.Size = new System.Drawing.Size(75, 23);
+            this.browseGodotPathButton.TabIndex = 11;
+            this.browseGodotPathButton.Text = "Browse...";
+            this.browseGodotPathButton.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(434, 141);
-            this.Controls.Add(this.godotPathBrowseButton);
+            this.Controls.Add(this.browseGodotPathButton);
             this.Controls.Add(this.godotPathTextBox);
             this.Controls.Add(this.godotPathLabel);
             this.Controls.Add(this.browseProjectsDirectoryButton);
@@ -204,7 +198,7 @@ namespace GodotQuickLaunch
         private System.Windows.Forms.Button browseProjectsDirectoryButton;
         private System.Windows.Forms.Label godotPathLabel;
         private System.Windows.Forms.TextBox godotPathTextBox;
-        private System.Windows.Forms.Button godotPathBrowseButton;
+        private System.Windows.Forms.Button browseGodotPathButton;
     }
 }
 
