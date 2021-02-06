@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
 using Microsoft.Win32;
+using System.Drawing;
 
 namespace GodotQuickLaunch
 {
@@ -73,7 +74,38 @@ namespace GodotQuickLaunch
                     {
                         // Verify that the folder is a Godot project by checking if a project.godot file exists inside and add an entry to the context menu strip
                         if(File.Exists(dirs[i] + @"\project.godot"))
-                            trayContextMenuStrip.Items.Add(projectName, null, OpenProject);
+                        {
+                            // Find the project icon
+                            Image projectIcon = null;
+                            // Read the project.godot file and find the line containing "config/icon"
+                            using (System.IO.StreamReader file = new System.IO.StreamReader(dirs[i] + @"\project.godot"))
+                            {
+                                string line = "";
+                                while ((line = file.ReadLine()) != null)
+                                {
+                                    if (line.Contains("config/icon"))
+                                    {
+                                        // Remove quotes from the path
+                                        line = line.Replace("\"", "");
+                                        /*** 
+                                         The icon path in the project.godot file starts with "res://"
+                                         Split it at "/" and return 3 elements in the array
+                                         Example, full line (after removing quotes) is: config/icon=res://icon.png
+                                         And it splits into config , icon=res: and /icon.png
+                                         The last element combined with dirs[i] gives us the full path to the image
+                                         Replace "/" with "\" just for consistency not really needed
+                                        ***/
+                                        string[] splitIconPath = line.Split(new char[1] {'/'}, 3);
+                                        string iconPath = dirs[i] + splitIconPath[splitIconPath.Length - 1].Replace('/', '\\');
+                                        // Load the icon from the path
+                                        projectIcon = Image.FromFile(iconPath);
+                                        break;
+                                    }
+                                }
+
+                            }
+                            trayContextMenuStrip.Items.Add(projectName, projectIcon, OpenProject);
+                        }
                     }
                 }
                 trayContextMenuStrip.Items.Add(new ToolStripSeparator());

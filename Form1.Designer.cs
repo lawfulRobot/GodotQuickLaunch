@@ -53,14 +53,13 @@ namespace GodotQuickLaunch
             this.toolStripSeparator1});
             this.trayContextMenuStrip.Name = "taskbarContextMenuStrip";
             this.trayContextMenuStrip.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
-            this.trayContextMenuStrip.ShowImageMargin = false;
-            this.trayContextMenuStrip.Size = new System.Drawing.Size(36, 10);
+            this.trayContextMenuStrip.Size = new System.Drawing.Size(181, 32);
             this.trayContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.TrayContextMenuStrip_Opening);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(32, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
             // 
             // notifyIcon1
             // 
