@@ -13,10 +13,14 @@ namespace GodotQuickLaunch
         private const string RegistryValueProjectsDirectory = "ProjectsDirectory";
         private const string RegistryKeyAppName             = "GodotQuickLaunch";
         private const string RegistryValueRunOnStartup      = "RunOnStartup";
+        private const string RegistryValueShowIcons         = "ShowIcons";
         private const string RegistryValueGodotPath         = "GodotPath";
 
         private string projectsDirectory = "";
         private string godotPath         = "";
+
+        private bool showIcons = false;
+        private bool isInitialStartup = true;
 
         public Form1()
         {
@@ -34,6 +38,12 @@ namespace GodotQuickLaunch
                 {
                     runOnStartupCheckBox.Checked = Convert.ToBoolean(savedData.GetValue(RegistryValueRunOnStartup));
                 }
+                if (savedData.GetValue(RegistryValueShowIcons) != null)
+                {
+                    showIcons = Convert.ToBoolean(savedData.GetValue(RegistryValueShowIcons));
+                    showIconsCheckBox.Checked = showIcons;
+                    trayContextMenuStrip.ShowImageMargin = showIcons;
+                }
                 string savedGodotPath = (string)savedData.GetValue(RegistryValueGodotPath);
                 if (!string.IsNullOrWhiteSpace(savedGodotPath))
                 {
@@ -48,7 +58,7 @@ namespace GodotQuickLaunch
                 }
                 
                 savedData.Close();
-                WindowState = FormWindowState.Minimized;
+                //WindowState = FormWindowState.Minimized;
             }
             SetupProjectsList();
             ShowInTaskbar = false;
@@ -75,34 +85,37 @@ namespace GodotQuickLaunch
                         // Verify that the folder is a Godot project by checking if a project.godot file exists inside and add an entry to the context menu strip
                         if(File.Exists(dirs[i] + @"\project.godot"))
                         {
-                            // Find the project icon
                             Image projectIcon = null;
-                            // Read the project.godot file and find the line containing "config/icon"
-                            using (System.IO.StreamReader file = new System.IO.StreamReader(dirs[i] + @"\project.godot"))
+                            if(showIcons)
                             {
-                                string line = "";
-                                while ((line = file.ReadLine()) != null)
+                                // Find the project icon
+                                // Read the project.godot file and find the line containing "config/icon"
+                                using (System.IO.StreamReader file = new System.IO.StreamReader(dirs[i] + @"\project.godot"))
                                 {
-                                    if (line.Contains("config/icon"))
+                                    string line = "";
+                                    while ((line = file.ReadLine()) != null)
                                     {
-                                        // Remove quotes from the path
-                                        line = line.Replace("\"", "");
-                                        /*** 
-                                         The icon path in the project.godot file starts with "res://"
-                                         Split it at "/" and return 3 elements in the array
-                                         Example, full line (after removing quotes) is: config/icon=res://icon.png
-                                         And it splits into config , icon=res: and /icon.png
-                                         The last element combined with dirs[i] gives us the full path to the image
-                                         Replace "/" with "\" just for consistency not really needed
-                                        ***/
-                                        string[] splitIconPath = line.Split(new char[1] {'/'}, 3);
-                                        string iconPath = dirs[i] + splitIconPath[splitIconPath.Length - 1].Replace('/', '\\');
-                                        // Load the icon from the path
-                                        projectIcon = Image.FromFile(iconPath);
-                                        break;
+                                        if (line.Contains("config/icon"))
+                                        {
+                                            // Remove quotes from the path
+                                            line = line.Replace("\"", "");
+                                            /*** 
+                                             The icon path in the project.godot file starts with "res://"
+                                             Split it at "/" and return 3 elements in the array
+                                             Example, full line (after removing quotes) is: config/icon=res://icon.png
+                                             And it splits into config , icon=res: and /icon.png
+                                             The last element combined with dirs[i] gives us the full path to the image
+                                             Replace "/" with "\" just for consistency not really needed
+                                            ***/
+                                            string[] splitIconPath = line.Split(new char[1] {'/'}, 3);
+                                            string iconPath = dirs[i] + splitIconPath[splitIconPath.Length - 1].Replace('/', '\\');
+                                            // Load the icon from the path
+                                            projectIcon = Image.FromFile(iconPath);
+                                            break;
+                                        }
                                     }
-                                }
 
+                                }
                             }
                             trayContextMenuStrip.Items.Add(projectName, projectIcon, OpenProject);
                         }
@@ -170,6 +183,8 @@ namespace GodotQuickLaunch
         {
             projectsDirectory = projectsDirectoryTextBox.Text;
             godotPath = godotPathTextBox.Text;
+            showIcons = showIconsCheckBox.Checked;
+            trayContextMenuStrip.ShowImageMargin = showIcons;
 
             RegistryKey registryKey = Registry.CurrentUser.OpenSubKey(RegistryKeyAppName, RegistryKeyPermissionCheck.ReadWriteSubTree);
             if(registryKey == null)
@@ -179,6 +194,7 @@ namespace GodotQuickLaunch
             registryKey.SetValue(RegistryValueProjectsDirectory, projectsDirectory);
             registryKey.SetValue(RegistryValueRunOnStartup, runOnStartupCheckBox.Checked);
             registryKey.SetValue(RegistryValueGodotPath, godotPath);
+            registryKey.SetValue(RegistryValueShowIcons, showIcons);
             registryKey.Close();
             SetRunOnStartup();
         }
@@ -237,6 +253,19 @@ namespace GodotQuickLaunch
                 {
                     godotPathTextBox.Text = openFileDialog.FileName;
                 }
+            }
+        }
+
+        private void Form1_Activated(object sender, EventArgs e)
+        {
+            if (isInitialStartup)
+            {
+                // This puts the application in the background
+                // This is done here because Hide() cannot be called in the constructor and the app
+                // shows up as a foreground app in task manager and also appears when alt-tabbing
+                // Side effect is the form flashes for a brief moment  ¯\_(ツ)_/¯
+                isInitialStartup = false;
+                Hide();
             }
         }
     }

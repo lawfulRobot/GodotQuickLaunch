@@ -44,6 +44,7 @@ namespace GodotQuickLaunch
             this.godotPathLabel = new System.Windows.Forms.Label();
             this.godotPathTextBox = new System.Windows.Forms.TextBox();
             this.browseGodotPathButton = new System.Windows.Forms.Button();
+            this.showIconsCheckBox = new System.Windows.Forms.CheckBox();
             this.trayContextMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -53,13 +54,13 @@ namespace GodotQuickLaunch
             this.toolStripSeparator1});
             this.trayContextMenuStrip.Name = "taskbarContextMenuStrip";
             this.trayContextMenuStrip.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
-            this.trayContextMenuStrip.Size = new System.Drawing.Size(181, 32);
+            this.trayContextMenuStrip.Size = new System.Drawing.Size(61, 10);
             this.trayContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.TrayContextMenuStrip_Opening);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(57, 6);
             // 
             // notifyIcon1
             // 
@@ -96,7 +97,7 @@ namespace GodotQuickLaunch
             // runOnStartupCheckBox
             // 
             this.runOnStartupCheckBox.AutoSize = true;
-            this.runOnStartupCheckBox.Location = new System.Drawing.Point(291, 110);
+            this.runOnStartupCheckBox.Location = new System.Drawing.Point(289, 94);
             this.runOnStartupCheckBox.Name = "runOnStartupCheckBox";
             this.runOnStartupCheckBox.Size = new System.Drawing.Size(131, 17);
             this.runOnStartupCheckBox.TabIndex = 5;
@@ -155,6 +156,16 @@ namespace GodotQuickLaunch
             this.browseGodotPathButton.Text = "Browse...";
             this.browseGodotPathButton.UseVisualStyleBackColor = true;
             // 
+            // showIconsCheckBox
+            // 
+            this.showIconsCheckBox.AutoSize = true;
+            this.showIconsCheckBox.Location = new System.Drawing.Point(289, 117);
+            this.showIconsCheckBox.Name = "showIconsCheckBox";
+            this.showIconsCheckBox.Size = new System.Drawing.Size(116, 17);
+            this.showIconsCheckBox.TabIndex = 5;
+            this.showIconsCheckBox.Text = "Show project icons";
+            this.showIconsCheckBox.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -166,6 +177,7 @@ namespace GodotQuickLaunch
             this.Controls.Add(this.browseProjectsDirectoryButton);
             this.Controls.Add(this.exitButton);
             this.Controls.Add(this.closeButton);
+            this.Controls.Add(this.showIconsCheckBox);
             this.Controls.Add(this.runOnStartupCheckBox);
             this.Controls.Add(this.saveButton);
             this.Controls.Add(this.projectsDirectoryTextBox);
@@ -177,6 +189,7 @@ namespace GodotQuickLaunch
             this.MinimumSize = new System.Drawing.Size(450, 180);
             this.Name = "Form1";
             this.Text = "Godot Quick Launch";
+            this.Activated += new System.EventHandler(this.Form1_Activated);
             this.trayContextMenuStrip.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -198,6 +211,7 @@ namespace GodotQuickLaunch
         private System.Windows.Forms.Label godotPathLabel;
         private System.Windows.Forms.TextBox godotPathTextBox;
         private System.Windows.Forms.Button browseGodotPathButton;
+        private System.Windows.Forms.CheckBox showIconsCheckBox;
     }
 }
 
