@@ -38,8 +38,7 @@ namespace GodotQuickLaunch
             this.projectsDirectoryTextBox = new System.Windows.Forms.TextBox();
             this.saveButton = new System.Windows.Forms.Button();
             this.runOnStartupCheckBox = new System.Windows.Forms.CheckBox();
-            this.closeButton = new System.Windows.Forms.Button();
-            this.exitButton = new System.Windows.Forms.Button();
+            this.editPinnedProjectsButton = new System.Windows.Forms.Button();
             this.browseProjectsDirectoryButton = new System.Windows.Forms.Button();
             this.godotPathLabel = new System.Windows.Forms.Label();
             this.godotPathTextBox = new System.Windows.Forms.TextBox();
@@ -104,23 +103,14 @@ namespace GodotQuickLaunch
             this.runOnStartupCheckBox.Text = "Run on system startup";
             this.runOnStartupCheckBox.UseVisualStyleBackColor = true;
             // 
-            // closeButton
+            // editPinnedProjectsButton
             // 
-            this.closeButton.Location = new System.Drawing.Point(88, 106);
-            this.closeButton.Name = "closeButton";
-            this.closeButton.Size = new System.Drawing.Size(75, 23);
-            this.closeButton.TabIndex = 6;
-            this.closeButton.Text = "Close";
-            this.closeButton.UseVisualStyleBackColor = true;
-            // 
-            // exitButton
-            // 
-            this.exitButton.Location = new System.Drawing.Point(169, 106);
-            this.exitButton.Name = "exitButton";
-            this.exitButton.Size = new System.Drawing.Size(75, 23);
-            this.exitButton.TabIndex = 7;
-            this.exitButton.Text = "Exit";
-            this.exitButton.UseVisualStyleBackColor = true;
+            this.editPinnedProjectsButton.Location = new System.Drawing.Point(88, 106);
+            this.editPinnedProjectsButton.Name = "editPinnedProjectsButton";
+            this.editPinnedProjectsButton.Size = new System.Drawing.Size(111, 23);
+            this.editPinnedProjectsButton.TabIndex = 7;
+            this.editPinnedProjectsButton.Text = "Edit Pinned Projects";
+            this.editPinnedProjectsButton.UseVisualStyleBackColor = true;
             // 
             // browseProjectsDirectoryButton
             // 
@@ -175,8 +165,7 @@ namespace GodotQuickLaunch
             this.Controls.Add(this.godotPathTextBox);
             this.Controls.Add(this.godotPathLabel);
             this.Controls.Add(this.browseProjectsDirectoryButton);
-            this.Controls.Add(this.exitButton);
-            this.Controls.Add(this.closeButton);
+            this.Controls.Add(this.editPinnedProjectsButton);
             this.Controls.Add(this.showIconsCheckBox);
             this.Controls.Add(this.runOnStartupCheckBox);
             this.Controls.Add(this.saveButton);
@@ -205,8 +194,7 @@ namespace GodotQuickLaunch
         private System.Windows.Forms.TextBox projectsDirectoryTextBox;
         private System.Windows.Forms.Button saveButton;
         private System.Windows.Forms.CheckBox runOnStartupCheckBox;
-        private System.Windows.Forms.Button closeButton;
-        private System.Windows.Forms.Button exitButton;
+        private System.Windows.Forms.Button editPinnedProjectsButton;
         private System.Windows.Forms.Button browseProjectsDirectoryButton;
         private System.Windows.Forms.Label godotPathLabel;
         private System.Windows.Forms.TextBox godotPathTextBox;

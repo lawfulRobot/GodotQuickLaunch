@@ -12,3 +12,7 @@ Here is an example of the tray menu
 And here is the settings
 
 ![](screenshots/screen-2.png)
+
+And the pinned projects editor
+
+![](screenshots/screen-3.png)

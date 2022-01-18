@@ -5,6 +5,7 @@ using System.IO;
 using System.Diagnostics;
 using Microsoft.Win32;
 using System.Drawing;
+using System.Collections.Generic;
 
 namespace GodotQuickLaunch
 {
@@ -12,6 +13,7 @@ namespace GodotQuickLaunch
     {
         private const string RegistryValueProjectsDirectory = "ProjectsDirectory";
         private const string RegistryKeyAppName             = "GodotQuickLaunch";
+        private const string RegistryValuePinnedProjects    = "PinnedProjects";
         private const string RegistryValueRunOnStartup      = "RunOnStartup";
         private const string RegistryValueShowIcons         = "ShowIcons";
         private const string RegistryValueGodotPath         = "GodotPath";
@@ -22,14 +24,21 @@ namespace GodotQuickLaunch
         private bool showIcons = false;
         private bool isInitialStartup = true;
 
+        public List<string> pinnedProjects = new List<string>();
+        public List<string> allProjects = new List<string>();
+        private PinnedProjectsEditor pinnedProjectsEditor;
+        private Form pinnedProjectsForm;
+
         public Form1()
         {
             InitializeComponent();
-            exitButton.Click += Exit;
+            pinnedProjectsForm = new PinnedProjectsEditor(this);
+            pinnedProjectsEditor = (PinnedProjectsEditor)pinnedProjectsForm;
+            editPinnedProjectsButton.Click += EditPinnedProjects;
             saveButton.Click += Save;
-            closeButton.Click += CloseForm;
             browseProjectsDirectoryButton.Click += BrowseProjectsDirectory;
             browseGodotPathButton.Click += BrowseGodotPath;
+            FormClosing += OnForm1Closing;
             // Get saved data from registry
             RegistryKey savedData = Registry.CurrentUser.OpenSubKey(RegistryKeyAppName);
             if(savedData != null)
@@ -56,6 +65,11 @@ namespace GodotQuickLaunch
                     projectsDirectory = savedProjectsPath;
                     projectsDirectoryTextBox.Text = savedProjectsPath;
                 }
+
+                if(savedData.GetValue(RegistryValuePinnedProjects) != null)
+                {
+                    pinnedProjects = new List<string> ((string[])savedData.GetValue(RegistryValuePinnedProjects));
+                }
                 
                 savedData.Close();
                 //WindowState = FormWindowState.Minimized;
@@ -64,61 +78,47 @@ namespace GodotQuickLaunch
             ShowInTaskbar = false;
         }
 
+        private void EditPinnedProjects(object sender, EventArgs e)
+        {
+            pinnedProjectsForm.Show();
+            pinnedProjectsEditor.SetProjectsList();
+        }
+
         private void SetupProjectsList()
         {
+            allProjects.Clear();
             trayContextMenuStrip.Items.Clear();
             // Check if projects path is assigned
             if(!string.IsNullOrWhiteSpace(projectsDirectory))
             {
                 projectsDirectory = FormatPath(projectsDirectory);
+                // Make sure there are pinned projects
+                if(pinnedProjects.Count > 0)
+                {
+                    // Add the pinned projects at the top of the menu
+                    for(int p = 0; p < pinnedProjects.Count; p++)
+                    {
+                        AddProjectToContextMenu(pinnedProjects[p], projectsDirectory + pinnedProjects[p]);
+                    }
+                    trayContextMenuStrip.Items.Add(new ToolStripSeparator());
+                }
+                
                 // Get all the folders in projects path
                 string[] dirs = Directory.GetDirectories(projectsDirectory, "*", SearchOption.TopDirectoryOnly);
+
                 for (int i = 0; i < dirs.Length; i++)
                 {
                     // Split the path
                     string[] splitPath = dirs[i].Split('\\');
                     // Get project folder name
                     string projectName = splitPath[splitPath.Length - 1];
-                    // Ignore folders starting with a dot
-                    if (!projectName.StartsWith("."))
+                    // Skip pinned projects because we already added them
+                    if(!pinnedProjects.Contains(projectName))
                     {
-                        // Verify that the folder is a Godot project by checking if a project.godot file exists inside and add an entry to the context menu strip
-                        if(File.Exists(dirs[i] + @"\project.godot"))
-                        {
-                            Image projectIcon = null;
-                            if(showIcons)
-                            {
-                                // Find the project icon
-                                // Read the project.godot file and find the line containing "config/icon"
-                                using (System.IO.StreamReader file = new System.IO.StreamReader(dirs[i] + @"\project.godot"))
-                                {
-                                    string line = "";
-                                    while ((line = file.ReadLine()) != null)
-                                    {
-                                        if (line.Contains("config/icon"))
-                                        {
-                                            // Remove quotes from the path
-                                            line = line.Replace("\"", "");
-                                            /*** 
-                                             The icon path in the project.godot file starts with "res://"
-                                             Split it at "/" and return 3 elements in the array
-                                             Example, full line (after removing quotes) is: config/icon=res://icon.png
-                                             And it splits into config , icon=res: and /icon.png
-                                             The last element combined with dirs[i] gives us the full path to the image
-                                             Replace "/" with "\" just for consistency not really needed
-                                            ***/
-                                            string[] splitIconPath = line.Split(new char[1] {'/'}, 3);
-                                            string iconPath = dirs[i] + splitIconPath[splitIconPath.Length - 1].Replace('/', '\\');
-                                            // Load the icon from the path
-                                            projectIcon = Image.FromFile(iconPath);
-                                            break;
-                                        }
-                                    }
-
-                                }
-                            }
-                            trayContextMenuStrip.Items.Add(projectName, projectIcon, OpenProject);
-                        }
+                        // Add non pinned project to menu
+                        AddProjectToContextMenu(projectName, dirs[i]);
+                        // Add non pinned project to the list we use on the pinned projects editor window
+                        allProjects.Add(projectName);
                     }
                 }
                 trayContextMenuStrip.Items.Add(new ToolStripSeparator());
@@ -133,7 +133,52 @@ namespace GodotQuickLaunch
                 trayContextMenuStrip.Items.Add("Open Projects Folder", null, OpenProjectsFolder);
             }
             trayContextMenuStrip.Items.Add("Settings", null, OpenSettings);
-            trayContextMenuStrip.Items.Add("Exit", null, Exit);
+            trayContextMenuStrip.Items.Add("Exit", null, Quit);
+        }
+
+        private void AddProjectToContextMenu(string projectName, string projectPath)
+        {
+            // Ignore folders starting with a dot
+            if (!projectName.StartsWith("."))
+            {
+                // Verify that the folder is a Godot project by checking if a project.godot file exists inside and add an entry to the context menu strip
+                if (File.Exists(projectPath + @"\project.godot"))
+                {
+                    Image projectIcon = null;
+                    if (showIcons)
+                    {
+                        // Find the project icon
+                        // Read the project.godot file and find the line containing "config/icon"
+                        using (System.IO.StreamReader file = new System.IO.StreamReader(projectPath + @"\project.godot"))
+                        {
+                            string line = "";
+                            while ((line = file.ReadLine()) != null)
+                            {
+                                if (line.Contains("config/icon"))
+                                {
+                                    // Remove quotes from the path
+                                    line = line.Replace("\"", "");
+                                    /*** 
+                                     The icon path in the project.godot file starts with "res://"
+                                     Split it at "/" and return 3 elements in the array
+                                     Example, full line (after removing quotes) is: config/icon=res://icon.png
+                                     And it splits into config , icon=res: and /icon.png
+                                     The last element combined with dirs[i] gives us the full path to the image
+                                     Replace "/" with "\" just for consistency not really needed
+                                    ***/
+                                    string[] splitIconPath = line.Split(new char[1] { '/' }, 3);
+                                    string iconPath = projectPath + splitIconPath[splitIconPath.Length - 1].Replace('/', '\\');
+                                    // Load the icon from the path
+                                    projectIcon = Image.FromFile(iconPath);
+                                    break;
+                                }
+                            }
+
+                        }
+                    }
+                    trayContextMenuStrip.Items.Add(projectName, projectIcon, OpenProject);
+                }
+            }
         }
 
         // Add a slash at the end of the projects path if there isn't one
@@ -165,8 +210,10 @@ namespace GodotQuickLaunch
 
         private void OpenProjectsFolder(object sender, EventArgs e) => Process.Start(projectsDirectory);
 
-        private void Exit(object sender, EventArgs e) => Application.Exit();
-
+        private void Quit(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
         private void OpenSettings(object sender, EventArgs e)
         {
             projectsDirectoryTextBox.Text = projectsDirectory;
@@ -199,6 +246,17 @@ namespace GodotQuickLaunch
             SetRunOnStartup();
         }
 
+        public void SavePinnedProjects()
+        {
+            RegistryKey registryKey = Registry.CurrentUser.OpenSubKey(RegistryKeyAppName, RegistryKeyPermissionCheck.ReadWriteSubTree);
+            if (registryKey == null)
+            {
+                registryKey = Registry.CurrentUser.CreateSubKey(RegistryKeyAppName, RegistryKeyPermissionCheck.ReadWriteSubTree);
+            }
+            registryKey.SetValue(RegistryValuePinnedProjects, pinnedProjects.ToArray());
+            registryKey.Close();
+        }
+
         private void SetRunOnStartup()
         {
             // Open the Run registry key
@@ -216,8 +274,6 @@ namespace GodotQuickLaunch
             }
             runKey.Close();
         }
-
-        private void CloseForm(object sender, EventArgs e) => Hide();
 
         private void BrowseProjectsDirectory(object sender, EventArgs e)
         {
@@ -265,6 +321,15 @@ namespace GodotQuickLaunch
                 // shows up as a foreground app in task manager and also appears when alt-tabbing
                 // Side effect is the form flashes for a brief moment  ¯\_(ツ)_/¯
                 isInitialStartup = false;
+                Hide();
+            }
+        }
+
+        private void OnForm1Closing(object sender, FormClosingEventArgs e)
+        {
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                e.Cancel = true;
                 Hide();
             }
         }
